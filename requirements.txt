@@ -1,0 +1,13 @@
+numpy
+scipy
+tqdm
+pandas
+xarray
+zarr
+h5py
+scikit-learn
+networkx
+matplotlib
+jupyter
+ipywidgets
+ipympl
