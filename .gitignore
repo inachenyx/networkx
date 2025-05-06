@@ -1,2 +1,4 @@
 myvenv
 .idea/
+.DS_Store
+data/

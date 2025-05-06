@@ -52,48 +52,47 @@ plt.title("Modular Connectivity Graph")
 plt.axis('off')
 plt.show()
 
+# Initialize neuron activity with random firing rates between 0 and 1
+neuron_activity = np.random.rand(len(G.nodes))
 
-# Parameters for dynamics
-num_steps = 100  # How many time steps to simulate
-threshold = 0.  # Firing threshold
-initial_active_prob = 0.1  # Initial probability that a neuron is active
+# Parameters for the model
+threshold = 0.5  # Firing threshold (for simplicity)
+alpha = 0.1  # How much influence neighbors have on the activity
+num_steps = 100  # Number of time steps for simulation
 
-# Initialize node states randomly: 1 = active, 0 = inactive
-np.random.seed(None)
-node_states = {node: (1 if np.random.rand() < initial_active_prob else 0) for node in G.nodes}
+# Activity history (for plotting)
+activity_history = []
 
-# Record the activity over time
-activity_over_time = []
+# Simulate neural activity dynamics over time
+for t in range(num_steps):
+    new_activity = neuron_activity.copy()
 
-for step in range(num_steps):
-    new_states = {}
-    for node in G.nodes:
-        neighbors = list(G.neighbors(node))
-        if not neighbors:
-            new_states[node] = node_states[node]
-            continue
+    # Update each neuron's activity based on its neighbors
+    for i in G.nodes:
+        # Get the sum of activity from neighboring neurons
+        neighbor_activity = np.mean([neuron_activity[j] for j in G.neighbors(i)])
 
-        # Compute average activity of neighbors
-        neighbor_activity = np.mean([node_states[neighbor] for neighbor in neighbors])
+        # Simple rule: increase activity based on neighbor activity
+        new_activity[i] = neuron_activity[i] + alpha * neighbor_activity
 
-        # Simple rule: activate if neighbor activity is high enough
-        if neighbor_activity > threshold:
-            new_states[node] = 1
+        # Apply threshold: if activity is too high, neuron fires (value capped at 1)
+        if new_activity[i] > threshold:
+            new_activity[i] = 1
         else:
-            new_states[node] = 0
+            new_activity[i] = 0
 
-    node_states = new_states
-    # Save current activity
-    activity_over_time.append([node_states[node] for node in G.nodes])
+    neuron_activity = new_activity
+    activity_history.append(neuron_activity)
 
-# Convert to numpy array for easier plotting
-activity_array = np.array(activity_over_time)
+# Convert activity history to a numpy array for plotting
+activity_array = np.array(activity_history)
 
-# Plot the activity over time
-plt.figure(figsize=(10, 6))
+# Plot the neural activity dynamics
 plt.imshow(activity_array.T, aspect='auto', cmap='binary', interpolation='nearest')
-plt.xlabel('Time step')
-plt.ylabel('Neuron (node)')
-plt.title('Neural Activity Dynamics Over Time')
-plt.colorbar(label='Activity (0 = inactive, 1 = active)')
+plt.colorbar(label="Activity (0 = inactive, 1 = active)")
+plt.title("Neural Activity Dynamics Over Time")
+plt.xlabel("Time step")
+plt.ylabel("Neuron (node)")
 plt.show()
+
+
